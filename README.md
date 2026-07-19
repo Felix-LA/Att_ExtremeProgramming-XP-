@@ -11,7 +11,9 @@ Criar um programa que calcula as gorjetas de um restaurante, sendo o que deve se
 3: Quantidade de Gorjeta oferecida(5%, 10%, 15%).
 
 5% -> 0.05.
+
 10% -> 0.10.
+
 15% -> 0.15.
 
 O sistema deverá calcular em um esquema de: resultado=(ValotTotal * Gorjeta Oferecida) / QuantidadeGarçom.
