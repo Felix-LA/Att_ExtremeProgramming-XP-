@@ -1,0 +1,215 @@
+Projeto: App Divisão de Gorjetas
+Desenvolvedores: Felix e Jowilson
+Metodologia: Agile (XP / TDD)
+
+História do Usuário
+
+Como cliente de restaurante (ex: grupo de amigos reunidos), Quero informar o valor da conta, a porcentagem da gorjeta e o número de garçons que nos
+atenderam, Para que eu possa calcular rapidamente a divisão exata da gorjeta por garçom e o valor total final da conta sem discussões ou impasses.
+
+Critérios de Aceitação
+
+O sistema deve solicitar e receber o valor do pedido, o percentual da gorjeta e a quantidade de garçons.
+O cálculo da gorjeta individual por garçom deve seguir a fórmula: 
+((Valor do Pedido * ( / 100)) / Qtd Garçons).
+O cálculo do valor total final da conta deve considerar o valor do pedido somado ao valor total das gorjetas.
+A saída deve apresentar os valores formatados com 2 casas decimais.
+
+Suite de Testes Realizados
+
++------+----------------------------------------+---------------------------------------+-------------------------------------------------+----------+
+| ID   | Cenário / Descrição                    | Entrada (Pedido, Gorjeta %, Garçons)  | Resultado Esperado (Gorjeta/Garçom, Total)      | Status   |
++------+----------------------------------------+---------------------------------------+-------------------------------------------------+----------+
+| TC01 | Cenário Padrão (2 garçons, 10%)        | R$ 200.00, 10%, 2 garçons             | Gorjeta/Garçom: R$ 10.00 | Total: R$ 220.00    | APROVADO |
+| TC02 | Múltiplos garçons (4 garçons, 15%)     | R$ 400.00, 15%, 4 garçons             | Gorjeta/Garçom: R$ 15.00 | Total: R$ 460.00    | APROVADO |
+| TC03 | Apenas 1 garçom (100% da gorjeta)      | R$ 150.00, 10%, 1 garçom              | Gorjeta/Garçom: R$ 15.00 | Total: R$ 165.00    | APROVADO |
++------+----------------------------------------+---------------------------------------+-------------------------------------------------+----------+
+
+
+EVIDÊNCIA DE TESTES TDD (TEST-DRIVEN DEVELOPMENT) - MVP CALCULADORA DE GORJETA
+
+Projeto: Calculadora e Divisão de Gorjeta (MVP)
+Desenvolvedores: DEV Felix & DEV Jowlison
+Linguagem: C (Standard C)
+Arquivo de Evidência TDD: test_gorjeta.c
+
+
+1. CONCEITO E METODOLOGIA TDD
+
+A Evidência do Teste Escrito Antes do Código (TDD) representa a aplicação da 
+metodologia Test-Driven Development (Desenvolvimento Orientado a Testes).
+
+Em vez de escrever a lógica do programa primeiro e depois testar para ver se 
+funciona, o fluxo do TDD funciona em um ciclo de três etapas chamado 
+RED-GREEN-REFACTOR:
+
+[1] Fase RED (Criar o teste que falha):
+    Antes mesmo de criar a lógica no código principal, a equipe escreve uma 
+    função de teste automatizada declarando o que o programa deve calcular e 
+    qual é o resultado exato esperado. Ao rodar o teste antes da lógica estar 
+    pronta, ele falha (fica no "vermelho" / RED).
+
+[2] Fase GREEN (Escrever o código mínimo para o teste passar):
+    Com os testes definidos, os desenvolvedores (Felix e Jowlison) implementam 
+    as funções de cálculo e as validações (como a regra das porcentagens de 
+    gorjeta em 5%, 10%, 15% ou 20%). Ao rodar o teste automatizado, as 
+    asserções passam com sucesso (fase GREEN).
+
+[3] Fase REFACTOR (Refatorar e integrar):
+    Com os cálculos testados e garantidos no nível unitário, o código é 
+    integrado com segurança à interface interativa do programa principal 
+    (leitura com scanf e exibição com printf).
+
+
+2. CÓDIGO FONTE DE TESTE UNITÁRIO EM C (test_gorjeta.c)
+
+Abaixo está o arquivo de teste automatizado escrito para validar a lógica 
+exata do código main.c:
+
+
+#include <stdio.h>
+#include <assert.h>
+#include <math.h>
+
+// --- FUNÇÕES DE LÓGICA / REGRA DE NEGÓCIO (EXTRAÍDAS PARA TESTE) ---
+
+// Valida se o percentual de gorjeta é válido (5, 10, 15 ou 20)
+int validarGorjeta(float percentualGorjeta) {
+    if (percentualGorjeta == 5.0f || percentualGorjeta == 10.0f || 
+        percentualGorjeta == 15.0f || percentualGorjeta == 20.0f) {
+        return 1; // Válido
+    }
+    return 0; // Inválido
+}
+
+// Calcula a gorjeta individual por garçom
+float calcularGorjetaPorGarcom(float valorPedido, float percentualGorjeta, int quantidadeGarcon) {
+    float gorjetaDecimal = percentualGorjeta / 100.0f;
+    return (valorPedido * gorjetaDecimal) / quantidadeGarcon;
+}
+
+// Calcula o valor total da conta (Pedido + Gorjeta Total)
+float calcularValorTotalConta(float valorPedido, float percentualGorjeta) {
+    float gorjetaDecimal = percentualGorjeta / 100.0f;
+    return (valorPedido * gorjetaDecimal) + valorPedido;
+}
+
+// Auxiliar para comparar números float com margem de tolerância
+int quaseIgual(float a, float b) {
+    return fabsf(a - b) < 0.01f;
+}
+
+
+// --- BATERIA DE TESTES UNITÁRIOS AUTOMATIZADOS ---
+
+void test_validarGorjeta() {
+    // Validações corretas (5%, 10%, 15%, 20%)
+    assert(validarGorjeta(5.0f) == 1);
+    assert(validarGorjeta(10.0f) == 1);
+    assert(validarGorjeta(15.0f) == 1);
+    assert(validarGorjeta(20.0f) == 1);
+
+    // Validações incorretas (ex: 8%, 12%, 25%)
+    assert(validarGorjeta(8.0f) == 0);
+    assert(validarGorjeta(12.0f) == 0);
+    assert(validarGorjeta(25.0f) == 0);
+
+    printf("[TDD GREEN] Teste de Validacao de Porcentagem da Gorjeta PASSOU!\n");
+}
+
+void test_calcularGorjetaPorGarcom() {
+    // Cenário: Pedido R$ 200.00 | Gorjeta 10% | 2 Garçons
+    // Gorjeta Total = R$ 20.00 | Cada Garçom = R$ 10.00
+    float resultado = calcularGorjetaPorGarcom(200.00f, 10.00f, 2);
+    assert(quaseIgual(resultado, 10.00f));
+
+    // Cenário: Pedido R$ 100.00 | Gorjeta 15% | 3 Garçons
+    // Gorjeta Total = R$ 15.00 | Cada Garçom = R$ 5.00
+    float resultado2 = calcularGorjetaPorGarcom(100.00f, 15.00f, 3);
+    assert(quaseIgual(resultado2, 5.00f));
+
+    printf("[TDD GREEN] Teste de Calculo de Gorjeta por Garcom PASSOU!\n");
+}
+
+void test_calcularValorTotalConta() {
+    // Cenário: Pedido R$ 200.00 | Gorjeta 10% -> Total = R$ 220.00
+    float total = calcularValorTotalConta(200.00f, 10.00f);
+    assert(quaseIgual(total, 220.00f));
+
+    // Cenário: Pedido R$ 150.00 | Gorjeta 20% -> Total = R$ 180.00
+    float total2 = calcularValorTotalConta(150.00f, 20.00f);
+    assert(quaseIgual(total2, 180.00f));
+
+    printf("[TDD GREEN] Teste de Calculo de Valor Total da Conta PASSOU!\n");
+}
+
+int main() {
+    printf("\n========================================================\n");
+    printf(" EXECUÇÃO DA SUÍTE DE TESTES TDD (FASE RED -> GREEN)\n");
+    printf("========================================================\n\n");
+
+    test_validarGorjeta();
+    test_calcularGorjetaPorGarcom();
+    test_calcularValorTotalConta();
+
+    printf("\n--------------------------------------------------------\n");
+    printf(" RESULTADO: TODOS OS TESTES PASSARAM COM SUCESSO! (GREEN)\n");
+    printf("--------------------------------------------------------\n\n");
+    return 0;
+}
+
+
+REGISTRO DE PLANNING GAME E ESTIMATIVAS - MVP CALCULADORA DE GORJETA
+
+Projeto: App Divisão e Cálculo de Gorjeta
+Metodologia: Extreme Programming (XP) / Scrum (Planning Game)
+Participantes: Dono do Estabelecimento (PO), DEV Felix, DEV Jowlison
+
+
+1. ATA DA SESSÃO DE PLANNING GAME
+
+- Papéis:
+  * Product Owner (PO): Dono do Estabelecimento
+  * Time de Desenvolvimento: DEV Felix & DEV Jowlison
+
+- Regras da Sessão:
+  * Unidade de Estimativa: Story Points (Escala de Fibonacci: 1, 2, 3, 5, 8)
+  * Capacidade da Sprint/Iteração: 10 Story Points
+  * Objetivo: Definir o escopo funcional para o MVP de solução de impasses em 
+    mesas de clientes.
+
+
+2. BACKLOG PRIORIZADO E ESTIMADO
+
++------+-------------------------------------------+------------------------+------------+------------+----------------+
+| ID   | História / Funcionalidade                 | Responsável            | Estimativa | Prioridade | Status         |
++------+-------------------------------------------+------------------------+------------+------------+----------------+
+| US01 | Cálculo e divisão de gorjeta individual   | DEV Felix &            | 3 SP       | Alta       | Concluído      |
+|      | por garçom e total final em C (Console)   | DEV Jowlison           |            |            |                |
++------+-------------------------------------------+------------------------+------------+------------+----------------+
+| US02 | Validação de entradas (impedir divisão    | DEV Felix              | 2 SP       | Média      | Planejado      |
+|      | por zero garçons ou valores negativos)    |                        |            |            |                |
++------+-------------------------------------------+------------------------+------------+------------+----------------+
+| US03 | Interface web/mobile amigável para o      | DEV Jowlison           | 5 SP       | Baixa      | Próxima Sprint |
+|      | cliente no restaurante                    |                        |            |            |                |
++------+-------------------------------------------+------------------------+------------+------------+----------------+
+
+
+3. DETALHAMENTO E JUSTIFICATIVA DA ESTIMATIVA (US01)
+
+História: US01 - Cálculo e divisão de gorjeta por garçom
+Estimativa Escolhida: 3 Story Points (3 SP)
+
+Análise de Critérios para Estimativa:
+- Complexidade Técnica: Baixa (algoritmo com operações aritméticas diretas).
+- Risco / Incerteza: Baixo (requisitos bem definidos pelo PO após o incidente na mesa).
+- Esforço de Implementação: Médio (devido à exigência de desenvolvimento orientado 
+  a testes com TDD, validação das porcentagens fixas de 5%, 10%, 15% e 20%, e 
+  formatação exata de saída no terminal/console).
+
+
+4. RESUMO DA CAPACIDADE E ALOCAÇÃO
+
+- Capacidade Total da Sprint: 10 SP
+- Pontos Comprometidos no MVP: 5 SP (US01 + US02)
+- Margem para Próxima Iteração: 5 SP (US03 mantida para o próximo ciclo)
